@@ -12,7 +12,7 @@ import (
 
 
 
-func Ping(w http.ResponseWriter) {
+func Ping(w http.ResponseWriter) (string, int) {
 
         flusher, ok := w.(http.Flusher)
         if !ok {
@@ -71,7 +71,8 @@ func Ping(w http.ResponseWriter) {
 			
 		}
 	exit_success()
-	}
+	return "exec.Ping", 0
+}
 	
 
 	func handle_dropped_connection (cmd *exec.Cmd) {
