@@ -17,7 +17,7 @@ func Ping(w http.ResponseWriter) (string, int) {
         flusher, ok := w.(http.Flusher)
         if !ok {
                 http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
-                exit_err()
+		return "execPing.Ping:: Streaming unsupported!, http.StatusInternalServerError ", 1
         }
 
 	notify := w.(http.CloseNotifier).CloseNotify()
@@ -27,7 +27,7 @@ func Ping(w http.ResponseWriter) (string, int) {
         stdout, err := cmd.StdoutPipe()
 	if err != nil {
                 println(err)
-		exit_err()
+		return "execPing.Ping:: error returned by cmd.StdoutPipe() ", 1
         }
 
 	var connected bool = true
@@ -38,7 +38,7 @@ func Ping(w http.ResponseWriter) (string, int) {
 
 	if err := cmd.Start(); err != nil {
                 fmt.Printf("%s\n", err)
-		exit_err()
+		return "execPing.Ping:: error returned by cmd.Start()", 1
         }
 
         bf := bufio.NewReader(stdout)
@@ -57,38 +57,33 @@ func Ping(w http.ResponseWriter) (string, int) {
 				}
 				if err := cmd.Process.Kill(); err != nil {
 					println("failed to kill process: ", err)
-					exit_err()
+					return "execPing.Ping:: failed to kill process ", 1
 				}
 
 				//The connection may have dropped unknown to us while we are inside this 'if' code block.
 			default:  
 				handle_dropped_connection (cmd)
+				return "execPing.Ping:: dropped connection", 1
 			}
 
 		}else {
 			handle_dropped_connection (cmd)
-			}
-			
+			return "execPing.Ping:: dropped connection", 1
+
 		}
-	exit_success()
-	return "exec.Ping", 0
+		
+	}
+	return "execPing.Ping:: normal exit", 0
 }
-	
 
-	func handle_dropped_connection (cmd *exec.Cmd) {
-		println("The client closed the connection prematurely. Cleaning up.")
-		println("killing process ", cmd.Process.Pid)
-		if err := cmd.Process.Kill(); err != nil {
-			println("failed to kill process: ", err)
-		}
-		cmd.Wait()
-		exit_err()
-	}
 
-	func exit_err() (string, int){
-		return "execPing.Ping", 1
+func handle_dropped_connection (cmd *exec.Cmd) {
+	println("The client closed the connection prematurely. Cleaning up.")
+	println("killing process ", cmd.Process.Pid)
+	if err := cmd.Process.Kill(); err != nil {
+		println("failed to kill process: ", err)
 	}
+	cmd.Wait()
+	return
+}
 
-	func exit_success()  (string, int){
-		return "execPing.Ping", 0
-	}
