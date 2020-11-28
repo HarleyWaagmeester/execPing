@@ -49,6 +49,10 @@ func Ping(w http.ResponseWriter) (string, int) {
 			case nil:
 				// valid line, echo it.  note that line contains trailing \n.
 				fmt.Fprintf(w,"%s<br>",line)
+				// inject javascript to scroll the browser to the bottom line
+				// NOTE: for nested elements use:
+				// window.scrollTo(0,document.querySelector(".scrollingContainer").scrollHeight);
+				fmt.Fprintf(w,"<script>window.scrollTo(0,document.body.scrollHeight);</script>")
 				flusher.Flush()
 			case io.EOF:
 				if line > "" {
