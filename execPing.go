@@ -64,7 +64,7 @@ func Ping(w http.ResponseWriter) (string, int) {
 					return "execPing.Ping:: failed to kill process ", 1
 				}
 
-				//The connection may have dropped unknown to us while we are inside this 'if' code block.
+				//The connection may drop inside this 'if' code block before the switch statement.
 			default:  
 				handle_dropped_connection (cmd)
 				return "execPing.Ping:: dropped connection", 1
